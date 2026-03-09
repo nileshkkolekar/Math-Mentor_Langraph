@@ -14,7 +14,7 @@ from src.input.image_parser import parse_image
 from src.input.audio_parser import parse_audio
 from src.input.pdf_parser import parse_pdf
 from src.rag.retriever import retrieve
-from src.agents.orchestrator import run_pipeline
+from src.agents.graph import run_pipeline
 from src.memory.store import store
 from src.memory.retriever import retrieve_similar
 
