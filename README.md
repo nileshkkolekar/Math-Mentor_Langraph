@@ -201,6 +201,7 @@ HITL triggers when:
      CHROMA_DATABASE = "your-database-name"
      ```
    - Run `python scripts/build_rag.py` **once** locally (with the same `CHROMA_*` in `.env`) so your knowledge base is uploaded to Chroma Cloud. After that, the deployed app will use Chroma Cloud and retrieval will persist across restarts.
+   - **Memory:** Session and feedback data are also written to a Chroma collection (`math_mentor_memory`), so similar-problem retrieval and memory persist on Chroma Cloud too.
    - If you prefer not to use Chroma Cloud: use **Option A** (run `run_with_rag.sh` as start command to rebuild index on each deploy) or **Option B** (commit `data/chroma`).
 
 Your app will be live at: `https://<your-app-name>.streamlit.app`.
@@ -235,7 +236,7 @@ Math scope is limited to: **Algebra**, **Probability**, **Basic calculus** (limi
 - **Correctness:** Test with sample problems from each domain (algebra, probability, calculus, linear algebra). Verifier agent checks units, domain, and edge cases; low confidence triggers HITL for human approval.
 - **RAG quality:** Retrieved chunks are shown in the UI; only top-k results are passed to the Solver, so there are no hallucinated citations. Run `python scripts/build_rag.py` to index the curated KB.
 - **HITL triggers:** OCR/ASR low confidence → extraction preview and edit; parser `needs_clarification` → confirm/edit parsed problem; verifier low confidence → Approve (keep solution) or Reject (start over). "Re-check" re-runs the full pipeline.
-- **Memory reuse:** Sessions with Correct/Incorrect feedback are stored in SQLite. Similar-problem retrieval (by topic and recent sessions) passes past solutions into the Solver prompt for pattern reuse. No model retraining.
+- **Memory reuse:** Sessions with Correct/Incorrect feedback are stored in **SQLite** and in **Chroma** (collection `math_mentor_memory`). Similar-problem retrieval uses **Chroma semantic search** when available (so memory persists on Chroma Cloud); otherwise falls back to SQLite recent + topic. Past solutions are passed into the Solver for pattern reuse. No model retraining.
 
 ## License
 
