@@ -8,6 +8,15 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import streamlit as st
+
+# Inject Streamlit Cloud Secrets into env so config and agents see OPENAI_API_KEY
+try:
+    if hasattr(st, "secrets") and st.secrets.get("OPENAI_API_KEY"):
+        import os
+        os.environ.setdefault("OPENAI_API_KEY", str(st.secrets["OPENAI_API_KEY"]))
+except Exception:
+    pass
+
 from src.config import OCR_CONFIDENCE_THRESHOLD
 from src.input.text_parser import parse_text
 from src.input.image_parser import parse_image
@@ -16,7 +25,6 @@ from src.input.pdf_parser import parse_pdf
 from src.rag.retriever import retrieve
 from src.agents.graph import run_pipeline
 from src.memory.store import store
-from src.memory.retriever import retrieve_similar
 
 st.set_page_config(page_title="Math Mentor", layout="wide")
 st.title("Math Mentor")

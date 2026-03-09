@@ -6,6 +6,19 @@ A JEE-style math mentor that accepts **text**, **image** (photo/screenshot), or 
 
 The agent pipeline is built with **LangGraph** (see `src/agents/graph.py`): a state graph with nodes Parser → Router → Retrieve → Solver → Verifier → Explainer and conditional edges for HITL (parser clarification, verifier approval).
 
+## Demo video
+
+**[▶ Demo (screen recording)](LINK_HERE)** — Replace `LINK_HERE` with a link to your video (e.g. YouTube, Google Drive, or the repo’s `Demo_video/` file after pushing with Git LFS).
+
+To add the video to the repo with Git LFS (run from project root; close any app that might be using the file if LFS reports "Access denied"):
+
+```bash
+git lfs track "Demo_video/*.mp4"
+git add "Demo_video/Screen Recording 2026-03-10 004226.mp4" .gitattributes
+git commit -m "Add demo video"
+git push
+```
+
 ## Architecture
 
 ```mermaid
@@ -145,7 +158,48 @@ HITL triggers when:
 
 ## Deployment
 
-- **Streamlit Cloud:** Connect the repo, set `OPENAI_API_KEY` in Secrets, run command: `streamlit run app/main.py --server.port $PORT`.
+### Deploy on Streamlit Community Cloud (step-by-step)
+
+1. **Push your app to GitHub**  
+   Your repo is already at: `https://github.com/nileshkkolekar/Math-Mentor_Langraph.git`.
+
+2. **Go to Streamlit Community Cloud**  
+   Open [share.streamlit.io](https://share.streamlit.io) and sign in with GitHub.
+
+3. **New app**  
+   Click **“New app”**, then:
+   - **Repository:** `nileshkkolekar/Math-Mentor_Langraph`
+   - **Branch:** `main`
+   - **Main file path:** `app/main.py`
+   - **App URL:** choose a name (e.g. `math-mentor-langraph`).
+
+4. **Secrets (required)**  
+   In the same dialog or later under **App → Settings → Secrets**, add:
+   ```toml
+   OPENAI_API_KEY = "sk-your-openai-key-here"
+   ```
+   Without this, the app will not work.
+
+5. **Advanced settings → Run command**  
+   Set the run command to:
+   ```bash
+   streamlit run app/main.py --server.port $PORT
+   ```
+   (Streamlit often fills this by default.)
+
+6. **Deploy**  
+   Click **“Deploy”**. The first build can take several minutes (EasyOCR, Whisper, etc.).
+
+7. **RAG index (so retrieval works)**  
+   The free tier does **not** keep `data/` between restarts. Either:
+   - **Option A:** After each deploy/restart, the app will have no RAG until you run the index build once. You can set the run command to the helper script so the index is built on startup:
+     - **Run command:** `bash scripts/run_with_rag.sh` (or on Windows build locally and see Option B).
+   - **Option B:** Build the index locally (`python scripts/build_rag.py`), then commit the `data/chroma` folder and push (if the repo size is acceptable). Then the deployed app will have RAG without building on startup.
+
+Your app will be live at: `https://<your-app-name>.streamlit.app`.
+
+---
+
 - **Hugging Face Spaces:** New Space → Streamlit, add the repo and the same run command; set env vars in Settings.
 
 After deployment, run `python scripts/build_rag.py` once (e.g. in a one-off job or at first start) so the Chroma index exists, or include a built index in the repo under `data/chroma` if the platform supports persistent storage.

@@ -49,6 +49,3 @@ Thumbs.db
 
 # Streamlit
 .streamlit/secrets.toml
-
-# Large media (use Git LFS or host elsewhere)
-Demo_video/
