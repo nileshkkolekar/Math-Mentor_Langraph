@@ -23,6 +23,11 @@ RAG_TOP_K = int(os.getenv("RAG_TOP_K", "5"))
 EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "openai")  # "openai" | "sentence_transformers"
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")  # OpenAI: text-embedding-3-small, text-embedding-ada-002
 
+# Chroma: use Cloud when CHROMA_API_KEY is set (e.g. on Streamlit Cloud)
+CHROMA_API_KEY = os.getenv("CHROMA_API_KEY", "")
+CHROMA_TENANT = os.getenv("CHROMA_TENANT", "default_tenant")
+CHROMA_DATABASE = os.getenv("CHROMA_DATABASE", "default_database")
+
 # HITL
 OCR_CONFIDENCE_THRESHOLD = float(os.getenv("OCR_CONFIDENCE_THRESHOLD", "0.7"))
 VERIFIER_CONFIDENCE_THRESHOLD = float(os.getenv("VERIFIER_CONFIDENCE_THRESHOLD", "0.75"))

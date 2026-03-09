@@ -13,9 +13,16 @@ def _embed_openai(texts: list[str], model: str | None = None) -> list[list[float
     model = model or EMBEDDING_MODEL
     out = []
     batch_size = 100
+    fallback_model = "text-embedding-ada-002"  # older model if 3-small is not available
     for i in range(0, len(texts), batch_size):
         batch = texts[i : i + batch_size]
-        resp = client.embeddings.create(input=batch, model=model)
+        try:
+            resp = client.embeddings.create(input=batch, model=model)
+        except Exception as e:
+            if "invalid model" in str(e).lower() and model != fallback_model:
+                resp = client.embeddings.create(input=batch, model=fallback_model)
+            else:
+                raise
         # Preserve order (API may return by index)
         by_index = {d.index: d.embedding for d in resp.data}
         out.extend(by_index[j] for j in range(len(batch)))

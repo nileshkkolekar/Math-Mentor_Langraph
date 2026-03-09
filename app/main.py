@@ -9,15 +9,22 @@ if str(ROOT) not in sys.path:
 
 import streamlit as st
 
-# Inject Streamlit Cloud Secrets into env so config and agents see OPENAI_API_KEY
+# Inject Streamlit Cloud Secrets into env so config and agents see them
 try:
-    if hasattr(st, "secrets") and st.secrets.get("OPENAI_API_KEY"):
+    if hasattr(st, "secrets"):
         import os
-        os.environ.setdefault("OPENAI_API_KEY", str(st.secrets["OPENAI_API_KEY"]))
+        if st.secrets.get("OPENAI_API_KEY"):
+            os.environ.setdefault("OPENAI_API_KEY", str(st.secrets["OPENAI_API_KEY"]))
+        if st.secrets.get("CHROMA_API_KEY"):
+            os.environ.setdefault("CHROMA_API_KEY", str(st.secrets["CHROMA_API_KEY"]))
+        if st.secrets.get("CHROMA_TENANT"):
+            os.environ.setdefault("CHROMA_TENANT", str(st.secrets["CHROMA_TENANT"]))
+        if st.secrets.get("CHROMA_DATABASE"):
+            os.environ.setdefault("CHROMA_DATABASE", str(st.secrets["CHROMA_DATABASE"]))
 except Exception:
     pass
 
-from src.config import OCR_CONFIDENCE_THRESHOLD
+from src.config import OCR_CONFIDENCE_THRESHOLD, OPENAI_API_KEY
 from src.input.text_parser import parse_text
 from src.input.image_parser import parse_image
 from src.input.audio_parser import parse_audio
@@ -29,6 +36,13 @@ from src.memory.store import store
 st.set_page_config(page_title="Math Mentor", layout="wide")
 st.title("Math Mentor")
 st.caption("Multimodal math problem solver with RAG, agents, and HITL")
+
+if not OPENAI_API_KEY or not OPENAI_API_KEY.strip().startswith("sk-"):
+    st.error(
+        "**OpenAI API key not set.** Solving will not work until you add it. "
+        "**Local:** Put `OPENAI_API_KEY=sk-your-key` in the `.env` file in the project root and restart the app. "
+        "**Streamlit Cloud:** Go to app Settings → Secrets and add: `OPENAI_API_KEY = \"sk-your-key\"` then save."
+    )
 
 # Session state
 if "result" not in st.session_state:

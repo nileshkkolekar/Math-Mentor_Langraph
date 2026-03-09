@@ -1,18 +1,28 @@
-"""Vector store using Chroma."""
+"""Vector store using Chroma (local or Chroma Cloud)."""
 from pathlib import Path
 from typing import Any
 
 import chromadb
 from chromadb.config import Settings
 
-from src.config import CHROMA_PERSIST_DIR
+from src.config import CHROMA_PERSIST_DIR, CHROMA_API_KEY, CHROMA_TENANT, CHROMA_DATABASE
 from src.rag.embedder import embed
 
 
 def get_client(persist_dir: Path | None = None):
+    """Use Chroma Cloud when CHROMA_API_KEY is set, else local PersistentClient."""
+    if CHROMA_API_KEY and CHROMA_API_KEY.strip():
+        return chromadb.CloudClient(
+            tenant=CHROMA_TENANT,
+            database=CHROMA_DATABASE,
+            api_key=CHROMA_API_KEY.strip(),
+        )
     persist_dir = persist_dir or CHROMA_PERSIST_DIR
     persist_dir.mkdir(parents=True, exist_ok=True)
-    return chromadb.PersistentClient(path=str(persist_dir), settings=Settings(anonymized_telemetry=False))
+    return chromadb.PersistentClient(
+        path=str(persist_dir),
+        settings=Settings(anonymized_telemetry=False),
+    )
 
 
 def get_or_create_collection(client, name: str = "math_mentor"):

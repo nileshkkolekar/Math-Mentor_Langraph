@@ -190,11 +190,18 @@ HITL triggers when:
 6. **Deploy**  
    Click **“Deploy”**. The first build can take several minutes (EasyOCR, Whisper, etc.).
 
-7. **RAG index (so retrieval works)**  
-   The free tier does **not** keep `data/` between restarts. Either:
-   - **Option A:** After each deploy/restart, the app will have no RAG until you run the index build once. You can set the run command to the helper script so the index is built on startup:
-     - **Run command:** `bash scripts/run_with_rag.sh` (or on Windows build locally and see Option B).
-   - **Option B:** Build the index locally (`python scripts/build_rag.py`), then commit the `data/chroma` folder and push (if the repo size is acceptable). Then the deployed app will have RAG without building on startup.
+7. **RAG on Streamlit Cloud (persistent)**  
+   To avoid rebuilding the index on every deploy, use **Chroma Cloud**:
+   - Sign up at [trychroma.com](https://www.trychroma.com/) and create a database (note your **API key**, **tenant**, **database**).
+   - In Streamlit **Settings → Secrets**, add:
+     ```toml
+     OPENAI_API_KEY = "sk-your-openai-key"
+     CHROMA_API_KEY = "your-chroma-cloud-api-key"
+     CHROMA_TENANT = "your-tenant-id"
+     CHROMA_DATABASE = "your-database-name"
+     ```
+   - Run `python scripts/build_rag.py` **once** locally (with the same `CHROMA_*` in `.env`) so your knowledge base is uploaded to Chroma Cloud. After that, the deployed app will use Chroma Cloud and retrieval will persist across restarts.
+   - If you prefer not to use Chroma Cloud: use **Option A** (run `run_with_rag.sh` as start command to rebuild index on each deploy) or **Option B** (commit `data/chroma`).
 
 Your app will be live at: `https://<your-app-name>.streamlit.app`.
 
@@ -208,7 +215,7 @@ After deployment, run `python scripts/build_rag.py` once (e.g. in a one-off job 
 
 | Issue | What you see | Fix |
 |-------|----------------|-----|
-| **Ephemeral filesystem** | After restart/redeploy, RAG shows "No chunks retrieved" and memory (feedback) is empty. | Most free tiers **do not persist** `data/`. Either: (1) Rebuild the RAG index on every startup (see below), or (2) Use the platform’s persistent storage and run `build_rag.py` once. |
+| **Ephemeral filesystem** | After restart/redeploy, RAG shows "No chunks retrieved" and memory (feedback) is empty. | Use **Chroma Cloud** (set `CHROMA_API_KEY`, `CHROMA_TENANT`, `CHROMA_DATABASE` in Secrets and build index once); or rebuild RAG on startup with `run_with_rag.sh`; or commit `data/chroma`. |
 | **Missing OPENAI_API_KEY** | "OpenAI API key not found" or agents return errors. | Set `OPENAI_API_KEY` in the platform’s **Secrets** or **Environment variables**. |
 | **Wrong port** | App deploys but "Site unreachable" or 404. | Run with `--server.port $PORT` (Streamlit Cloud uses `$PORT`; HF Spaces may use `7860` – check the platform docs). |
 | **Build / startup timeout** | Build or app start fails after several minutes. | Dependencies (EasyOCR, Whisper, sentence-transformers if used) are heavy. Prefer a platform with longer build time or smaller image; or build the RAG index locally and commit `data/chroma` so the app doesn’t need to run `build_rag.py` at startup. |
