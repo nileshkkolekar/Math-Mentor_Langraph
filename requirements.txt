@@ -1,0 +1,28 @@
+# Core
+streamlit>=1.28.0,<2.0.0
+python-dotenv>=1.0.0
+
+# LLM
+openai>=1.0.0
+
+# RAG
+chromadb>=0.4.22
+sentence-transformers>=2.2.2
+
+# Multimodal input
+easyocr>=1.7.0
+opencv-python-headless>=4.8.0
+openai-whisper
+soundfile>=0.12.1
+scipy>=1.10.0
+pymupdf>=1.23.0
+
+# Math / tools
+sympy>=1.12
+
+# Memory / DB
+# (SQLite is stdlib)
+
+# Optional: PaddleOCR alternative
+# paddlepaddle>=2.5.0
+# paddleocr>=2.7.0
