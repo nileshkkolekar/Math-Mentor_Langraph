@@ -4,6 +4,8 @@ A JEE-style math mentor that accepts **text**, **image** (photo/screenshot), or 
 
 **Full workflow and technical overview:** see [docs/PROJECT_WORKFLOW_AND_TECHNICAL_OVERVIEW.md](docs/PROJECT_WORKFLOW_AND_TECHNICAL_OVERVIEW.md) for end-to-end flow, all 5 agents, tech stack, and design decisions.
 
+The agent pipeline is built with **LangGraph** (see `src/agents/graph.py`): a state graph with nodes Parser → Router → Retrieve → Solver → Verifier → Explainer and conditional edges for HITL (parser clarification, verifier approval).
+
 ## Architecture
 
 ```mermaid
@@ -132,11 +134,13 @@ HITL triggers when:
 | Area   | Path |
 |--------|------|
 | Input  | `src/input/` – text, image (OCR), audio (ASR) |
-| Agents | `src/agents/` – Parser, Router, Solver, Verifier, Explainer, orchestrator |
+| Agents | `src/agents/` – Parser, Router, Solver, Verifier, Explainer; LangGraph pipeline in `graph.py` |
 | Tools  | `src/tools/calculator.py` – sympy-based safe math |
 | RAG    | `src/rag/` – chunker, embedder, Chroma store, retriever |
 | Memory | `src/memory/` – SQLite store, similar-problem retriever |
 | KB     | `knowledge_base/*.md` – formulas, templates, pitfalls |
+| Scripts | `scripts/` – build_rag.py, run_with_rag, generate_sample_audio |
+| Docs   | `docs/` – workflow and technical overview |
 | UI     | `app/main.py` – Streamlit app |
 
 ## Deployment
@@ -175,3 +179,5 @@ Math scope is limited to: **Algebra**, **Probability**, **Basic calculus** (limi
 ## License
 
 MIT.
+
+# Math-Mentor_Langraph
